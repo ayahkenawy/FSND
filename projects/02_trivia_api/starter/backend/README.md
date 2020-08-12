@@ -72,9 +72,11 @@ This README is missing documentation of your endpoints. Below is an example for 
 
 Endpoints
 GET '/categories'
-GET ...
-POST ...
-DELETE ...
+GET '/questions'
+POST '/questions'
+DELETE '/questions/<int:id>q'
+GET '/categories/<int:category_id>/questions'
+POST '/quizzes'
 
 GET '/categories'
 - Fetches a dictionary of categories in which the keys are the ids and the value is the corresponding string of the category
@@ -88,8 +90,104 @@ GET '/categories'
 '6' : "Sports"}
 
 ```
+GET '/questions'
+-Return catogries
+-Return questions
+-Paging questions
+Example URL :http://127.0.0.1:5000/questions
+{
+  "categories": {
+    "1": "Science", 
+    "2": "Art", 
+    "3": "Geography", 
+    "4": "History", 
+    "5": "Entertainment", 
+    "6": "Sports"
+  }, 
+  "questions": [
+    {
+      "answer": "Muhammad Ali", 
+      "category": 4, 
+      "difficulty": 1, 
+      "id": 9, 
+      "question": "What boxer's original name is Cassius Clay?"
+    }, 
+    {
+      "answer": "Apollo 13", 
+      "category": 5, 
+      "difficulty": 4, 
+      "id": 2, 
+      "question": "What movie earned Tom Hanks his third straight Oscar nomination, in 1996?"
+    }, 
+    {
+      "answer": "Tom Cruise", 
+      "category": 5, 
+      "difficulty": 4, 
+      "id": 4, 
+      "question": "What actor did author Anne Rice first denounce, then praise in the role of her beloved Lestat?"
+    }, 
+```
+POST '/questions'
+-Create new question
+-Search question
+```
+'DELETE '/questions/<int:id>q'
+- Delete question by id
+Example URL : http://127.0.0.1:5000/questions/6
+{
+  "deleted": 6, 
+  "success": true
+}
+```
+GET '/categories/<int:category_id>/questions'
+-Search question by category id 
+Example URL :http://127.0.0.1:5000/categories/2/questions
+{
+  "current_category": 2, 
+  "questions": [
+    {
+      "answer": "Escher", 
+      "category": 2, 
+      "difficulty": 1, 
+      "id": 16, 
+      "question": "Which Dutch graphic artist\u2013initials M C was a creator of optical illusions?"
+    }, 
+    {
+      "answer": "Mona Lisa", 
+      "category": 2, 
+      "difficulty": 3, 
+      "id": 17, 
+      "question": "La Giaconda is better known as what?"
+    }, 
+    {
+      "answer": "One", 
+      "category": 2, 
+      "difficulty": 4, 
+      "id": 18, 
+      "question": "How many paintings did Van Gogh sell in his lifetime?"
+    }, 
+    {
+      "answer": "Jackson Pollock", 
+      "category": 2, 
+      "difficulty": 2, 
+      "id": 19, 
+      "question": "Which American artist was a pioneer of Abstract Expressionism, and a leading exponent of action painting?"
+    }
+  ], 
+  "success": true, 
+  "total_questions": 4
+}
+```
+POST '/quizzes'
 
 
+```
+Error Types 
+400  bad request
+404  resource not found
+422  unprocessable
+500  unprocessable
+```
 ## Testing
 To run the tests, run
 ```
