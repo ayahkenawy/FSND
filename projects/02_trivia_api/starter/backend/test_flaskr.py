@@ -49,6 +49,13 @@ class TriviaTestCase(unittest.TestCase):
         self.assertTrue(data['total_questions'])
         self.assertTrue(len(data['questions']))
 
+    def test_get_questions_fails(self):
+        response = self.client().get('/questions?page=2020')
+        data = json.loads(response.data)
+        self.assertEqual(response.status_code, 404)
+        self.assertEqual(data['success'], False)
+        self.assertEqual(data['message'], 'resource not found')
+
     def test_delete_question(self):
         question = Question(question=self.new_question['question'], answer=self.new_question['answer'],
                             category=self.new_question['category'], difficulty=self.new_question['difficulty'])
@@ -65,6 +72,14 @@ class TriviaTestCase(unittest.TestCase):
         self.assertTrue(len(questions_before) - len(questions_after) == 1)
         self.assertEqual(question, None)
 
+    def test_delete_question_fails(self):
+        question_id = 10000
+        response = self.client().delete('/questions/{}'.format(question_id))
+        data = json.loads(response.data)
+        self.assertEqual(response.status_code, 404)
+        self.assertEqual(data['success'], False)
+        self.assertEqual(data['message'], 'not found')
+
     def test_create_question(self):
         questions_before = Question.query.all()
         response = self.client().post('/questions', json=self.new_question)
@@ -76,6 +91,15 @@ class TriviaTestCase(unittest.TestCase):
         self.assertTrue(len(questions_after) - len(questions_before) == 1)
         self.assertIsNotNone(question)
 
+    def test_create_question_fails(self):
+        questions_before = Question.query.all()
+        response = self.client().post('/questions', json={})
+        data = json.loads(response.data)
+        questions_after = Question.query.all()
+        self.assertEqual(response.status_code, 422)
+        self.assertEqual(data['success'], False)
+        self.assertTrue(len(questions_after) == len(questions_before)
+
     def test_search_questions(self):
         response = self.client().post('/questions',
                                       json={'searchTerm': 'tournament'})
@@ -84,6 +108,14 @@ class TriviaTestCase(unittest.TestCase):
         self.assertEqual(data['success'], True)
         self.assertEqual(len(data['questions']), 1)
         self.assertEqual(data['questions'][0]['id'], 23)
+
+    def test_search_question_fails(self):
+        response = self.client().post('/questions',
+                                      json={'searchTerm': 'abcdefghijk'})
+        data = json.loads(response.data)
+        self.assertEqual(response.status_code, 404)
+        self.assertEqual(data['success'], False)
+        self.assertEqual(data['message'], 'resource not found')
 
     def test_get_questions_by_category(self):
         category_id = 1
@@ -95,6 +127,14 @@ class TriviaTestCase(unittest.TestCase):
         self.assertTrue(data['total_questions'])
         self.assertEqual(data['current_category'], category_id)
 
+    def test_get_questions_by_category_fails(self):
+        category_id = 10000
+        response = self.client().get('/categories/{}/questions'.format(category_id))
+        data = json.loads(response.data)
+        self.assertEqual(response.status_code, 404)
+        self.assertEqual(data['success'], False)
+        self.assertEqual(data['message'], 'not found')
+
     def test_get_guesses(self):
         category = Category.query.first()
         response = self.client().post(
@@ -104,8 +144,12 @@ class TriviaTestCase(unittest.TestCase):
         self.assertEqual(data['success'], True)
         self.assertTrue(data['question'])
 
-    
-
+    def test_fget_guesses_fails(self):
+        response = self.client.post('/quizzes', json={"quiz_category": category.format()})
+        data = json.loads(response.data)
+        self.assertEqual(response.status_code, 400)
+        self.assertFalse(data['success'])
+        self.assertEqual(data['message'], 'bad request')
 
 # Make the tests conveniently executable
 if __name__ == "__main__":
