@@ -207,18 +207,34 @@ def create_app(test_config=None):
   '''
   @app.route('/quizzes', methods=['GET','POST'])
   def get_guesses():
-      body = request.get_json()
-
-      if body == None or 'quiz_category' not in body.keys():
-          return abort(422)
-      prev_questions = []
-      if 'prev_questions' in body.keys():
-          previous_questions = body['prev_questions']
-      question = Question.query.filter(Question.category == body['quiz_category']['id'], Question.id.notin_(prev_questions)).first()
-      return jsonify({
-          "success": True,
-          "question": question.format() if question != None else None
-      })
+    body = request.get_json()
+    if not body:
+        abort(400)
+    if (body.get('previous_questions') is None or body.get('quiz_category') is None):
+        abort(400)
+    previous_questions = body.get('previous_questions')
+    if type(previous_questions) != list:
+        abort(400)
+    category = body.get('quiz_category')
+    category_id = category['id']
+    if category_id == 0:
+        randomQuestion = Question.query.order_by(func.random())
+    else:
+        randomQuestion = Question.query.filter(
+            Question.category == category_id).order_by(func.random())
+    if not randomQuestion.all():
+        abort(404)
+    else:
+        quest = randomQuestion.filter(Question.id.notin_(
+            previous_questions)).first()
+    if quest is None:
+        return jsonify({
+            'success': True
+        })
+    return jsonify({
+        'success': True,
+        'question': quest.format()
+    })
   '''
   @TODO: 
   Create error handlers for all expected errors 
